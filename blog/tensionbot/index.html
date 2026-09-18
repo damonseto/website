@@ -22,8 +22,63 @@
       <p class="subtitle">Generating climbs on a Tension Board with a small GPT.</p>
       <p class="meta">September 2026</p>
 
-      <!-- Post content goes here. -->
-      <p>Coming soon.</p>
+      <p>
+        Tension Bot generates boulder problems for the Tension Board 2. Pick a board
+        angle and a grade, click Generate, and it draws a new climb over a photo of
+        the board so you can set it by looking at the screen.
+      </p>
+      <p>
+        <a href="https://tensionbot.onrender.com">Try it here.</a>
+        It runs on a free tier, so the first load after it has been idle can take up
+        to a minute.
+      </p>
+
+      <h2>How it works</h2>
+      <p>
+        Behind the page is a small GPT I wrote from scratch: a decoder-only
+        transformer with 978k parameters (4 blocks, 4 heads, width 128), trained on
+        a CPU. The training data is about 15.5k community climbs for the TB2 Mirror
+        layout, each paired with the angle it was climbed at and its community grade.
+      </p>
+      <p>
+        A climb is written as a sequence of hold and role tokens, where the role is
+        start, hand, finish or foot:
+      </p>
+      <pre><code>[BOS, p466, r8, p477, r6, ..., EOS]</code></pre>
+      <p>
+        The angle and grade you pick go in at the front of the sequence, and the
+        model writes the rest one token at a time. The rules of the board are
+        enforced while it writes rather than left to the model: holds and roles
+        alternate, no hold is used twice, and a climb has at most two starts and
+        one finish.
+      </p>
+      <p>
+        The server then generates up to 10 candidates and returns the first one
+        where no start or hand hold sits above the finish.
+      </p>
+
+      <h2>What to expect</h2>
+      <p>
+        Most of the training data is at 40–45° and roughly V2–V7, so that is where
+        the climbs are best. Other angles and grades are offered, but the model has
+        seen little data there.
+      </p>
+      <p>
+        The model also knows nothing about hold type or orientation. It only learns
+        which holds tend to appear together, so it can produce a climb that is
+        unclimbable because a hold faces the wrong way.
+      </p>
+
+      <h2>Code</h2>
+      <p>
+        The web app is at
+        <a href="https://github.com/damonseto/TBgenerator">damonseto/TBgenerator</a>,
+        and the model, data pipeline and training notebooks are at
+        <a href="https://github.com/damonseto/tensionboardproject">damonseto/tensionboardproject</a>.
+        The project was inspired by
+        <a href="https://climbest.app/blog/kiltergpt">KilterGPT</a>.
+      </p>
+      <p>A longer write-up is coming.</p>
     </article>
   </main>
 
